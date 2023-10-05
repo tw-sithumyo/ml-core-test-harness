@@ -67,21 +67,21 @@ then
   Help
 fi
 
-source ./automate_perf.env
+# source ./perf.env
 
 # define the list of dashboards
 declare -a dashboards=(\
-  "dashboard-account-lookup-service" \
+  # "dashboard-account-lookup-service" \
   "Central%20Ledger%20DB" \
-  "Kafka%20Exporter%20Overview" \
-  "mojaloop-central-ledger" \
-  "Mojaloop%20-%20Central-Ledger%20-%20Performance%20Characterization" \
-  "Mojaloop%20-%20ML-API" \
-  "Docker%20Prometheus%20Monitoring" \
-  "NodeJS%20Application%20Dashboard" \
-  "Official%20k6%20Test%20Result" \
-  "MySQL%20Overview" \
-  "Supporting%20Services%20-%20Callback%20Hander%20Service"
+  # "Kafka%20Exporter%20Overview" \
+  # "mojaloop-central-ledger" \
+  # "Mojaloop%20-%20Central-Ledger%20-%20Performance%20Characterization" \
+  # "Mojaloop%20-%20ML-API" \
+  # "Docker%20Prometheus%20Monitoring" \
+  # "NodeJS%20Application%20Dashboard" \
+  # "Official%20k6%20Test%20Result" \
+  # "MySQL%20Overview" \
+  # "Supporting%20Services%20-%20Callback%20Hander%20Service"
   )
 
 # # create a directory to store the results with date timestamp in the name, check if the directory exists
@@ -147,8 +147,10 @@ then
   # Add sleep 10s for grafana to catchup with the metrics
   sleep 10
 else
-  startTestMilliseconds=$captureFromTime
-  endTestMilliseconds=$captureToTime
+  # startTestMilliseconds=$(date -j -f "%Y-%m-%d %H:%M:%S" "$captureFromTime" "+%s")
+  startTestMilliseconds=$(date -d "$captureFromTime" +"%s")
+  # endTestMilliseconds=$(date -j -f "%Y-%m-%d %H:%M:%S" "$captureToTime" "+%s")
+  endTestMilliseconds=$(date -d "$captureToTime" +"%s")
 fi
 
 if [ ! -d "results/$resultsSubDir/$K6_SCENARIO_NAME/images" ]; then
@@ -161,18 +163,21 @@ do
   dashboard_string=$(echo $dashboard | sed 's/%20/ /g' | tr -d ' ')
   #  printf -v dashboard_string "%b" "${dashboard//\%/\\x}"
   echo "$dashboard_string"
-  dashboardUrl=$(curl "http://$GRAFANA_USERNAME:$GRAFANA_PASSWORD@$GRAFANA_HOSTNAME:$GRAFANA_PORT/api/search?query=$dashboard" | jq -r '.[].url')
+  dashboardUrl=$(curl -v "http://$GRAFANA_USERNAME:$GRAFANA_PASSWORD@$GRAFANA_HOSTNAME:$GRAFANA_PORT/api/search?query=$dashboard" | jq -r '.[].url')
   #check if dashboard is NodeJSApplicationDashboard
-  if [[ $dashboard_string == *"NodeJSApplicationDashboard"* ]]; then
-      curl "http://$GRAFANA_USERNAME:$GRAFANA_PASSWORD@$GRAFANA_HOSTNAME:$GRAFANA_PORT/render$dashboardUrl?height=5000&width=2000&from=$startTestMilliseconds&to=$endTestMilliseconds&var-prefix=moja_als&var-instance=All&var-serviceName=All&var-podName=All" > ./results/$resultsSubDir/$K6_SCENARIO_NAME/images/$dashboard_string-moja_als.png
-      curl "http://$GRAFANA_USERNAME:$GRAFANA_PASSWORD@$GRAFANA_HOSTNAME:$GRAFANA_PORT/render$dashboardUrl?height=5000&width=2000&from=$startTestMilliseconds&to=$endTestMilliseconds&var-prefix=moja_cl&var-instance=All&var-serviceName=All&var-podName=All" > ./results/$resultsSubDir/$K6_SCENARIO_NAME/images/$dashboard_string-moja_cl.png
-      curl "http://$GRAFANA_USERNAME:$GRAFANA_PASSWORD@$GRAFANA_HOSTNAME:$GRAFANA_PORT/render$dashboardUrl?height=5000&width=2000&from=$startTestMilliseconds&to=$endTestMilliseconds&var-prefix=moja_ml&var-instance=All&var-serviceName=All&var-podName=All" > ./results/$resultsSubDir/$K6_SCENARIO_NAME/images/$dashboard_string-moja_ml.png
-      curl "http://$GRAFANA_USERNAME:$GRAFANA_PASSWORD@$GRAFANA_HOSTNAME:$GRAFANA_PORT/render$dashboardUrl?height=5000&width=2000&from=$startTestMilliseconds&to=$endTestMilliseconds&var-prefix=cbs&var-instance=All&var-serviceName=All&var-podName=All" > ./results/$resultsSubDir/$K6_SCENARIO_NAME/images/$dashboard_string-cbs.png
-  elif [[ $dashboard_string == *"MySQLOverview"* ]]; then
-      curl "http://$GRAFANA_USERNAME:$GRAFANA_PASSWORD@$GRAFANA_HOSTNAME:$GRAFANA_PORT/render$dashboardUrl?height=6500&width=2000&from=$startTestMilliseconds&to=$endTestMilliseconds" > ./results/$resultsSubDir/$K6_SCENARIO_NAME/images/$dashboard_string.png
-  else
-      curl "http://$GRAFANA_USERNAME:$GRAFANA_PASSWORD@$GRAFANA_HOSTNAME:$GRAFANA_PORT/render$dashboardUrl?height=5000&width=2000&from=$startTestMilliseconds&to=$endTestMilliseconds" > ./results/$resultsSubDir/$K6_SCENARIO_NAME/images/$dashboard_string.png
-  fi
+  # if [[ $dashboard_string == *"NodeJSApplicationDashboard"* ]]; then
+  #     echo "---------------------"
+      # echo "http://$GRAFANA_USERNAME:$GRAFANA_PASSWORD@$GRAFANA_HOSTNAME:$GRAFANA_PORT/render$dashboardUrl?height=5000&width=2000&from=$startTestMilliseconds&to=$endTestMilliseconds&var-prefix=moja_als&var-instance=All&var-serviceName=All&var-podName=All"
+  #     echo "---------------------"
+      curl -v "http://$GRAFANA_USERNAME:$GRAFANA_PASSWORD@$GRAFANA_HOSTNAME:$GRAFANA_PORT/render$dashboardUrl?height=5000&width=2000&from=$startTestMilliseconds&to=$endTestMilliseconds&var-prefix=moja_als&var-instance=All&var-serviceName=All&var-podName=All" > ./results/$resultsSubDir/$K6_SCENARIO_NAME/images/$dashboard_string-moja_als.png
+  #     curl "http://$GRAFANA_USERNAME:$GRAFANA_PASSWORD@$GRAFANA_HOSTNAME:$GRAFANA_PORT/render$dashboardUrl?height=5000&width=2000&from=$startTestMilliseconds&to=$endTestMilliseconds&var-prefix=moja_cl&var-instance=All&var-serviceName=All&var-podName=All" > ./results/$resultsSubDir/$K6_SCENARIO_NAME/images/$dashboard_string-moja_cl.png
+  #     curl "http://$GRAFANA_USERNAME:$GRAFANA_PASSWORD@$GRAFANA_HOSTNAME:$GRAFANA_PORT/render$dashboardUrl?height=5000&width=2000&from=$startTestMilliseconds&to=$endTestMilliseconds&var-prefix=moja_ml&var-instance=All&var-serviceName=All&var-podName=All" > ./results/$resultsSubDir/$K6_SCENARIO_NAME/images/$dashboard_string-moja_ml.png
+  #     curl "http://$GRAFANA_USERNAME:$GRAFANA_PASSWORD@$GRAFANA_HOSTNAME:$GRAFANA_PORT/render$dashboardUrl?height=5000&width=2000&from=$startTestMilliseconds&to=$endTestMilliseconds&var-prefix=cbs&var-instance=All&var-serviceName=All&var-podName=All" > ./results/$resultsSubDir/$K6_SCENARIO_NAME/images/$dashboard_string-cbs.png
+  # elif [[ $dashboard_string == *"MySQLOverview"* ]]; then
+  #     curl "http://$GRAFANA_USERNAME:$GRAFANA_PASSWORD@$GRAFANA_HOSTNAME:$GRAFANA_PORT/render$dashboardUrl?height=6500&width=2000&from=$startTestMilliseconds&to=$endTestMilliseconds" > ./results/$resultsSubDir/$K6_SCENARIO_NAME/images/$dashboard_string.png
+  # else
+  #     curl "http://$GRAFANA_USERNAME:$GRAFANA_PASSWORD@$GRAFANA_HOSTNAME:$GRAFANA_PORT/render$dashboardUrl?height=5000&width=2000&from=$startTestMilliseconds&to=$endTestMilliseconds" > ./results/$resultsSubDir/$K6_SCENARIO_NAME/images/$dashboard_string.png
+  # fi
 done
 
 # Generate an empty README
