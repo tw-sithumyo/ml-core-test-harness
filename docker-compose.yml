@@ -427,7 +427,7 @@ services:
       - RABBITMQ_PASSWORD=guest # TODO: change this in production
       - RABBITMQ_QUEUE=acquirer_to_registry
       - RABBITMQ_REPLY_QUEUE=registry_reply_acquirer
-      - SENDGRID_API_KEY=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 # TODO: change this 
+      # - SENDGRID_API_KEY=<sendgrid-api> # TODO: change this 
 
     profiles:
       - merchant-services
