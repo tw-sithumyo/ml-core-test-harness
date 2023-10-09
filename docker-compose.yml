@@ -11,8 +11,8 @@ services:
     image: mojaloop/central-ledger:${CENTRAL_LEDGER_VERSION}
     container_name: central-ledger
     command: sh -c "/opt/app/config-modifier/run.js /opt/app/config/default.json /opt/app/config-modifier/configs/central-ledger.js /opt/app/config/default.json && /opt/app/wait4/wait4.js central-ledger && node src/api/index.js"
-    # ports:
-    #   - "3001:3001"
+    ports:
+      - "3001:3001"
     volumes:
        - ./docker/wait4:/opt/app/wait4
        - ./docker/config-modifier:/opt/app/config-modifier
@@ -84,8 +84,8 @@ services:
       - mojaloop-net
     image: docker.io/bitnami/kafka:${DEP_KAFKA_VERSION}
     container_name: kafka
-    # ports:
-    #   - "9092:9092"
+    ports:
+      - "9092:9092"
     environment:
       # BITNAMI_DEBUG: "yes"
       ALLOW_PLAINTEXT_LISTENER: "yes"
@@ -117,8 +117,8 @@ services:
   mysql:
     image: mysql/mysql-server:${DEP_MYSQL_VERSION}
     container_name: mysql
-    # ports:
-    #   - "3306:3306"
+    ports:
+      - "3306:3306"
     volumes:
       # Note: this fixes the permissions issue, but docker-compose up will fail on first attempt
       - ./docker/sql-init/:/docker-entrypoint-initdb.d/
@@ -153,8 +153,8 @@ services:
         condition: service_started
       central-ledger:
         condition: service_started
-    # ports:
-    #   - "3002:3002"
+    ports:
+      - "3002:3002"
     volumes:
       - ./docker/config-modifier:/opt/app/config-modifier
     healthcheck:
@@ -172,8 +172,8 @@ services:
     image: mojaloop/ml-api-adapter:${ML_API_ADAPTER_VERSION}
     container_name: ml-api-adapter
     command: sh -c "/opt/app/config-modifier/run.js /opt/app/config/default.json /opt/app/config-modifier/configs/ml-api-adapter.js /opt/app/config/default.json && /opt/app/wait4/wait4.js ml-api-adapter && node src/api/index.js"
-    # ports:
-    #   - "3000:3000"
+    ports:
+      - "3000:3000"
     volumes:
       - ./docker/wait4:/opt/app/wait4
       - ./docker/config-modifier:/opt/app/config-modifier
@@ -201,8 +201,8 @@ services:
   simulator:
     image: mojaloop/simulator:${TEST_SIMULATOR_VERSION}
     container_name: simulator
-    # ports:
-    #   - "8444:8444"
+    ports:
+      - "8444:8444"
     environment:
       - LOG_LEVEL=info
       - TRANSFERS_ENDPOINT=http://ml-api-adapter:3000
@@ -226,9 +226,9 @@ services:
     image: mojaloop/account-lookup-service:${ACCOUNT_LOOKUP_SERVICE_VERSION}
     container_name: account-lookup-service
     command: sh -c "/opt/app/config-modifier/run.js /opt/app/config/default.json /opt/app/config-modifier/configs/account-lookup-service.js /opt/app/config/default.json && /opt/app/wait4/wait4.js account-lookup-service && npm run migrate && node src/index.js server"
-    # ports:
-    #   - "4001:4001"
-    #   - "4002:4002"
+    ports:
+      - "4001:4001"
+      - "4002:4002"
     environment:
       - LOG_LEVEL=info
       - ALS_DISPLAY_ROUTES=false
@@ -395,3 +395,189 @@ services:
       - kafka
     profiles:
       - debug
+
+  acquirer-backend:
+    container_name: acquirer-backend
+    image: twstm/acquirer-backend:${MERCHANT_ACQUIRER_BACKEND_VERSION}
+    networks:
+      - mojaloop-net
+    command: ["npm", "run", "acquirer-backend:start"]
+    ports:
+      - "5555:5555"
+    environment:
+      - APP_URL=http://0.0.0.0:5555
+      - HOST=0.0.0.0
+      - PORT=5555
+
+      - DB_HOST=acquirer-db
+      - DB_PORT=3306
+      - DB_USERNAME=root
+      - DB_PASSWORD=password
+      - DB_DATABASE=merchant_acquirer_db
+
+      - S3_ENDPOINT=minio
+      - S3_PORT=9000
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadmin
+      - S3_MERCHANT_BUCKET_NAME=merchant-documents
+
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=guest # TODO: change this in production
+      - RABBITMQ_PASSWORD=guest # TODO: change this in production
+      - RABBITMQ_QUEUE=acquirer_to_registry
+      - RABBITMQ_REPLY_QUEUE=registry_reply_acquirer
+      - SENDGRID_API_KEY=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 # TODO: change this 
+
+    profiles:
+      - merchant-services
+      - all-services
+
+    depends_on:
+      - acquirer-db
+      - minio
+      - rabbitmq
+
+  acquirer-frontend:
+    image: twstm/acquirer-frontend:${MERCHANT_ACQUIRER_FRONTEND_VERSION}
+    container_name: acquirer-frontend
+    networks:
+      - mojaloop-net
+    environment:
+      - VITE_HOST=0.0.0.0
+      - VITE_PORT=5173
+      - VITE_API_URL=http://localhost:5555/api/v1
+    ports:
+      - "5173:5173"
+
+    profiles:
+      - merchant-services
+      - all-services
+
+
+  registry-oracle:
+    image: twstm/registry-oracle:${MERCHANT_REGISTRY_ORACLE_VERSION}
+    container_name: registry-oracle
+    healthcheck:
+      test: wget -q http://localhost:6666/health-check -O /dev/null || exit 1
+      timeout: 20s
+      retries: 10
+      start_period: 40s
+      interval: 30s
+    networks:
+      - mojaloop-net
+    ports:
+      - 6666:6666
+    environment:
+      - APP_URL=http://0.0.0.0:6666
+      - HOST=0.0.0.0
+      - PORT=6666
+
+      - DB_HOST=oracle-db
+      - DB_PORT=3306
+      - DB_USERNAME=root
+      - DB_PASSWORD=password
+      - DB_DATABASE=registry-oracle
+
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=guest # TODO: change this in production
+      - RABBITMQ_PASSWORD=guest # TODO: change this in production
+      - RABBITMQ_QUEUE=acquirer_to_registry
+      - RABBITMQ_REPLY_QUEUE=registry_reply_acquirer
+
+    depends_on:
+      - oracle-db
+      - rabbitmq
+      # oracle-db:
+      #   condition: service_healthy
+      # rabbitmq:
+      #   condition: service_healthy
+          
+
+    profiles:
+      - merchant-services
+      - all-services
+
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.12.4-management-alpine
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    networks:
+      - mojaloop-net
+    ports:
+      - 5673:5672 
+      - 15673:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest # TODO: change this in production
+      - RABBITMQ_DEFAULT_PASS=guest # TODO: change this in production
+    profiles:
+      - merchant-services
+      - all-services
+
+
+  acquirer-db:
+    container_name: acquirer-db
+    networks:
+      - mojaloop-net
+    image: mysql:8.0.33
+    # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
+    # (this is just an example, not intended to be a production configuration)
+    command: --default-authentication-plugin=mysql_native_password
+
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=merchant_acquirer_db
+    ports:
+      - 8808:3306
+    profiles:
+      - merchant-services
+      - all-services
+
+
+  oracle-db:
+    container_name: oracle-db
+    networks:
+      - mojaloop-net
+    image: mysql:8.0.33
+    # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
+    # (this is just an example, not intended to be a production configuration)
+    command: --default-authentication-plugin=mysql_native_password
+
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=registry-oracle
+    ports:
+      - 7707:3306
+    profiles:
+      - merchant-services
+      - all-services
+
+
+  minio:
+    networks:
+      - mojaloop-net
+    image: minio/minio:RELEASE.2023-07-21T21-12-44Z
+    volumes:
+      - data:/data
+    ports:
+      - "9000:9000"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server /data
+
+    profiles:
+      - merchant-services
+      - all-services
+
+volumes:
+  data:
+

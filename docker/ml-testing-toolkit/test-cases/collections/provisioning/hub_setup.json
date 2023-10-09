@@ -668,7 +668,7 @@
           "body": {
             "oracleIdType": "ALIAS",
             "endpoint": {
-              "value": "{$inputs.HOST_SIMULATOR}/oracle",
+              "value": "{$inputs.MERCHANT_ORACLE}",
               "endpointType": "URL"
             },
             "currency": "{$inputs.currency}",
