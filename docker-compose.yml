@@ -117,8 +117,8 @@ services:
   mysql:
     image: mysql/mysql-server:${DEP_MYSQL_VERSION}
     container_name: mysql
-    ports:
-      - "3306:3306"
+    # ports:
+      # - "3306:3306"
     volumes:
       # Note: this fixes the permissions issue, but docker-compose up will fail on first attempt
       - ./docker/sql-init/:/docker-entrypoint-initdb.d/
