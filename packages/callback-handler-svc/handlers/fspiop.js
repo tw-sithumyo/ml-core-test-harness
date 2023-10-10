@@ -49,7 +49,7 @@ const init = (config, logger, options = undefined) => {
       await axios.put(`${FSPIOP_ALS_ENDPOINT_URL}/parties/${type}/${id}`, {
         "party": {
           "partyIdInfo": {
-            "partyIdType": "MSISDN",
+            "partyIdType": "ALIAS",
             "partyIdentifier": id,
             "fspId": FSP_ID,
             "partySubIdOrType": "HEALTH_CARD"
@@ -57,9 +57,9 @@ const init = (config, logger, options = undefined) => {
           "personalInfo": {
             "dateOfBirth": "1971-12-25",
             "complexName": {
-              "lastName": "Trudeau",
-              "middleName": "Pierre",
-              "firstName": "Justin"
+              "firstName": "ABC Store",
+              "middleName": "Main Road, Yangon, Myanmar",
+              "lastName": id,
             }
           },
           "name": "Justin Pierre"

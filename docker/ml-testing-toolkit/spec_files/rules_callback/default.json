@@ -299,12 +299,12 @@
               "fspId": "greenbankfsp"
             },
             "merchantClassificationCode": null,
-            "name": "Justin Pierre",
+            "name": "ABC Store",
             "personalInfo": {
               "complexName": {
-                "firstName": "Justin",
-                "middleName": "Pierre",
-                "lastName": "Trudeau"
+                "firstName": "ABC Store",
+                "middleName": "Main Road, Yangon, Myanmar",
+                "lastName": "000000"
               },
               "dateOfBirth": "1971-12-25"
             }
