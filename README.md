@@ -1,4 +1,4 @@
-# Mojaloop Core test Harness
+# Mojaloop Core test Harness with Merchant
 
 Run `Mojaloop` in your local machine using docker-compose without need for a `Kubernetes` cluster.
 
@@ -8,12 +8,12 @@ Run `Mojaloop` in your local machine using docker-compose without need for a `Ku
 - docker
 - docker-compose
 
-## Starting mojaloop core services for a simple P2P transfer
+## Starting mojaloop core services for a simple merchant payment transfer
 
 Execute the following commands to run mojaloop in local machine
 
 ```bash
-git clone https://github.com/mojaloop/ml-core-test-harness.git
+git clone -b merchant-demo https://github.com/tw-sithumyo/ml-core-test-harness.git
 cd ml-core-test-harness
 docker-compose --profile all-services --profile ttk-provisioning --profile ttk-tests up
 ```
@@ -46,8 +46,20 @@ You should see the following output after some time. That means all your mojaloo
 │ Runtime duration  │ 2398 ms                       │
 └───────────────────┴───────────────────────────────┘
 ```
+You can now access Merchant Acquirer Frontend UI with http://localhost:5173/
+Can be login with `greenbankadmin1@email.com` with `password` for Green Bank DFSP
+ 
 
-You can see all the test reports at http://localhost:9660/admin/reports and latest report should be available in `reports/` folder.
+Create Merchant
+
+Logout and login again with second DFSP Account `greenbankadmin2@email.com` with `password`
+
+Go to the Pending Table, Select the Merchant and Approve.
+
+(you should see Alias PayintoID like 000001 in All Merchants Table with Approved status)
+
+Go to the Mobile Simulator Testing Toolkit Web Interface http://localhost:9660/mobilesimulator
+And try to send money to `000001`
 
 ## Running P2P transfer again in a separate terminal session along with the running mojaloop
 
