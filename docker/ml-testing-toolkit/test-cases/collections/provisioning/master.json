@@ -11,6 +11,10 @@
     {
       "name": "participant_ttkpayeefsp",
       "type": "file"
+    },
+    {
+      "name": "merchant_hub.json",
+      "type": "file"
     }
   ]
 }

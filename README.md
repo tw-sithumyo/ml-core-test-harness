@@ -15,7 +15,7 @@ Execute the following commands to run mojaloop in local machine
 ```bash
 git clone -b merchant-demo https://github.com/tw-sithumyo/ml-core-test-harness.git
 cd ml-core-test-harness
-docker-compose --profile all-services --profile ttk-provisioning --profile ttk-tests up
+docker compose --profile all-services --profile ttk-provisioning --profile ttk-tests up
 ```
 
 Wait for some time to get all the containers up and healthy.

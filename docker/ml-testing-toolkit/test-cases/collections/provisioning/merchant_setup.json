@@ -1,0 +1,98 @@
+{
+  "name": "multi",
+  "test_cases": [
+    {
+      "id": 3,
+      "type": "Oracle Onboarding",
+      "name": "Merchant Onboarding",
+      "requests": [
+        {
+          "id": 1,
+          "meta": {
+            "info": "Health Check"
+          },
+          "description": "Acquirer Backend Health Check",
+          "apiVersion": {
+            "minorVersion": 1,
+            "majorVersion": 1,
+            "type": "als_admin"
+          },
+          "operationPath": "/api/v1/health-check",
+          "path": "/api/v1/health-check",
+          "method": "get",
+          "body": {
+          },
+          "url": "{$inputs.MERCHANT_ACQUIRER_ENDPOINT_BASE_URL}",
+          "tests": {
+            "assertions": [
+              {
+                "id": 1,
+                "description": "Response status to be 200",
+                "exec": [
+                  "expect(response.status).to.equal(200)"
+                ]
+              },
+              {
+                "id": 2,
+                "description": "Response message to be 'OK'",
+                "exec": [
+                  "expect(response.body.message).to.equal('OK')"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": 2,
+          "meta": {
+            "info": "Login As HubUser1"
+          },
+          "description": "Authenticate and obtain a token from the ACQUIRER_BACKEND",
+          "apiVersion": {
+            "minorVersion": 1,
+            "majorVersion": 1,
+            "type": "als_admin"
+          },
+          "operationPath": "/api/v1/users/login",
+          "path": "/api/v1/users/login",
+          "method": "post",
+          "body": {
+            "email": "hubuser1@email.com",
+            "password": "password"
+          },
+          "url": "{$inputs.MERCHANT_ACQUIRER_ENDPOINT_BASE_URL}",
+          "tests": {
+            "assertions": [
+              {
+                "id": 1,
+                "description": "Response status to be 200",
+                "exec": [
+                  "expect(response.status).to.equal(200)"
+                ]
+              },
+              {
+                "id": 2,
+                "description": "Response message to be 'Login successful'",
+                "exec": [
+                  "expect(response.body.message).to.equal('Login successful')"
+                ]
+              },
+              {
+                "id": 3,
+                "description": "Response body to have a token",
+                "exec": [
+                  "expect(response.body.token).to.exist"
+                ]
+              }
+            ]
+          },
+          "postRequest": {
+              "exec": [
+                "environment.merchant_hub_user1_token = response.body.token;"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
