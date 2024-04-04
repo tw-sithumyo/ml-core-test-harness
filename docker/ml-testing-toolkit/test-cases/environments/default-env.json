@@ -73,6 +73,7 @@
     "PERF_FSP8_CALLBACK_ENDPOINT_BASE_URL": "http://sim-perffsp8:3001/fspiop",
     "PERF_ORACLE_ENDPOINT_BASE_URL": "http://callback-handler-svc-oracle-sim:3001/oracle",
     "MERCHANT_ACQUIRER_ENDPOINT_BASE_URL": "http://acquirer-backend:5555/",
-    "MERCHANT_ORACLE_ENDPOINT_BASE_URL": "http://registry-oracle:8888/"
+    "MERCHANT_ORACLE_ENDPOINT_BASE_URL": "http://registry-oracle:8888/",
+    "HUB_USER_TOKEN": "EMPTY TOKEN"
   }
 }

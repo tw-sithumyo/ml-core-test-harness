@@ -81,14 +81,45 @@
                 "id": 3,
                 "description": "Response body to have a token",
                 "exec": [
-                  "expect(response.body.token).to.exist"
+                  "expect(response.body.token).to.exist;"
                 ]
               }
             ]
           },
           "postRequest": {
               "exec": [
-                "environment.merchant_hub_user1_token = response.body.token;"
+                "console.log('response.body.token: ' + response.body.token);",
+                "$input.HUB_USER_TOKEN = response.body.token;"
+            ]
+          }
+        },
+        {
+          "id": 3,
+          "meta": {
+            "info": "GET DFSPs list"
+          },
+          "description": "GET DFSPs list",
+          "apiVersion": {
+            "minorVersion": 1,
+            "majorVersion": 1,
+            "type": "als_admin"
+          },
+          "operationPath": "/api/v1/dfsps",
+          "path": "/api/v1/dfsps",
+          "method": "get",
+          "url": "{$inputs.MERCHANT_ACQUIRER_ENDPOINT_BASE_URL}",
+          "headers": {
+            "Authorization": "Bearer {$inputs.HUB_USER_TOKEN}"
+          },
+          "tests": {
+            "assertions": [
+              {
+                "id": 1,
+                "description": "Response status to be 200",
+                "exec": [
+                  "expect(response.status).to.equal(200)"
+                ]
+              }
             ]
           }
         }
