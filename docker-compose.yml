@@ -343,6 +343,8 @@ services:
         condition: service_healthy
       acquirer-backend:
         condition: service_healthy
+      registry-oracle:
+        condition: service_healthy
     networks:
       - mojaloop-net
     command:
@@ -489,7 +491,7 @@ services:
     networks:
       - mojaloop-net
     ports:
-      - 8888:6666
+      - 6666:6666
     environment:
       - APP_URL=http://0.0.0.0:6666
       - HOST=0.0.0.0
