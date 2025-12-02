@@ -1,0 +1,3 @@
+curl -H "Content-Type: application/json" \
+  -H "Date: $(date -u +%a,\ %d\ %b\ %Y\ %H:%M:%S\ GMT)" \
+  -X GET http://127.0.0.1:3001/participants

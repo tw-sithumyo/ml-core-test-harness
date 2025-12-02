@@ -240,8 +240,8 @@ services:
         condition: service_started
       central-ledger:
         condition: service_started
-      simulator:
-        condition: service_healthy
+      # simulator:
+      #   condition: service_healthy
     volumes:
       - ./docker/wait4:/opt/app/wait4
       - ./docker/config-modifier:/opt/app/config-modifier
